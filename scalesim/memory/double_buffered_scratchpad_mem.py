@@ -83,13 +83,17 @@ class double_buffered_scratchpad:
                                       total_size_bytes=ifmap_buf_size_bytes,
                                       word_size=word_size,
                                       active_buf_frac=rd_buf_active_frac,
-                                      backing_buf_default_bw=ifmap_backing_buf_bw)
+                                      backing_buf_default_bw=ifmap_backing_buf_bw,
+                                      use_ramulator_trace=self.config.get_ramulator_trace()
+                                      )
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
                                        total_size_bytes=filter_buf_size_bytes,
                                        word_size=word_size,
                                        active_buf_frac=rd_buf_active_frac,
-                                       backing_buf_default_bw=filter_backing_buf_bw)
+                                       backing_buf_default_bw=filter_backing_buf_bw,
+                                       use_ramulator_trace=self.config.get_ramulator_trace()
+                                      )
         else:
             self.ifmap_buf = rdbuf()
             self.filter_buf = rdbuf()
@@ -108,13 +112,17 @@ class double_buffered_scratchpad:
                                       total_size_bytes=ifmap_buf_size_bytes,
                                       word_size=word_size,
                                       active_buf_frac=rd_buf_active_frac,
-                                      backing_buf_bw=ifmap_backing_buf_bw)
+                                      backing_buf_bw=ifmap_backing_buf_bw,
+                                      use_ramulator_trace=self.config.get_ramulator_trace()
+                                      )
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
                                        total_size_bytes=filter_buf_size_bytes,
                                        word_size=word_size,
                                        active_buf_frac=rd_buf_active_frac,
-                                       backing_buf_bw=filter_backing_buf_bw)
+                                       backing_buf_bw=filter_backing_buf_bw,
+                                       use_ramulator_trace=self.config.get_ramulator_trace()
+                                       )
 
         self.ofmap_buf.set_params(backing_buf_obj=self.ofmap_port,
                                   total_size_bytes=ofmap_buf_size_bytes,
@@ -206,8 +214,9 @@ class double_buffered_scratchpad:
             ofmap_serviced_cycles += [ofmap_cycle_out[0]]
             ofmap_stalls = ofmap_cycle_out[0] - cycle_arr[0]
             #ofmap_stalls = stall_cycles
-
-            self.stall_cycles += ifmap_stalls[0] + filter_stalls[0] + ofmap_stalls[0]
+            
+            self.stall_cycles += int(max(ifmap_stalls[0], filter_stalls[0],ofmap_stalls[0]))
+            #self.stall_cycles += ifmap_stalls[0] + filter_stalls[0] + ofmap_stalls[0]
 
         if self.estimate_bandwidth_mode:
             # IDE shows warning as complete_all_prefetches is not implemented in read_buffer class

@@ -44,7 +44,6 @@ class read_port:
             self.count+=1
         else:
             latency_out = self.latency
-            #print("Extra requests")
         return latency_out
 
     # The incoming read requests will be needed when the capability of port is expanded

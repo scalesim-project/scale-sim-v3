@@ -48,11 +48,11 @@ class read_buffer:
         self.active_buf_full_flag = False
         self.hashed_buffer_valid = False
         self.trace_valid = False
-
+        self.use_ramulator_trace = False
     #
     def set_params(self, backing_buf_obj,
                    total_size_bytes=1, word_size=1, active_buf_frac=0.9,
-                   hit_latency=1, backing_buf_bw=1
+                   hit_latency=1, backing_buf_bw=1, use_ramulator_trace = False
                    ):
 
         self.total_size_bytes = total_size_bytes
@@ -69,6 +69,7 @@ class read_buffer:
         self.total_size_elems = math.floor(self.total_size_bytes / self.word_size)
         self.active_buf_size = int(math.ceil(self.total_size_elems * self.active_buf_frac))
         self.prefetch_buf_size = self.total_size_elems - self.active_buf_size
+        self.use_ramulator_trace = use_ramulator_trace
 
     #
     def reset(self): # TODO: check if all resets are working propoerly
@@ -108,6 +109,7 @@ class read_buffer:
         self.active_buf_full_flag = False
         self.hashed_buffer_valid = False
         self.trace_valid = False
+        self.use_ramulator_trace = False
 
     #
     def set_fetch_matrix(self, fetch_matrix_np):
@@ -242,8 +244,11 @@ class read_buffer:
                     if potential_stall_cycles > 0:
                         offset += potential_stall_cycles
                    
-
-            out_cycles = cycle + offset + dram_stall_cycles
+            
+            if self.use_ramulator_trace == True:
+                out_cycles = cycle + offset + dram_stall_cycles
+            else:
+                out_cycles = cycle + offset
             out_cycles_arr.append(out_cycles)
 
         out_cycles_arr_np = np.asarray(out_cycles_arr).reshape((len(out_cycles_arr), 1))
