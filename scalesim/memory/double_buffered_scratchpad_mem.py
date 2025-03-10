@@ -56,9 +56,10 @@ class double_buffered_scratchpad:
         self.ofmap_dram_stop_cycle = 0
         self.ofmap_dram_writes = 0
 
-        self.estimate_bandwidth_mode = False,
+        self.estimate_bandwidth_mode = False
         self.traces_valid = False
         self.params_valid_flag = True
+        self.use_ramulator_trace = self.config.get_ramulator_trace()
 
     #
     def set_params(self,
@@ -84,7 +85,7 @@ class double_buffered_scratchpad:
                                       word_size=word_size,
                                       active_buf_frac=rd_buf_active_frac,
                                       backing_buf_default_bw=ifmap_backing_buf_bw,
-                                      use_ramulator_trace=self.config.get_ramulator_trace()
+                                      use_ramulator_trace=self.use_ramulator_trace
                                       )
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
@@ -92,13 +93,13 @@ class double_buffered_scratchpad:
                                        word_size=word_size,
                                        active_buf_frac=rd_buf_active_frac,
                                        backing_buf_default_bw=filter_backing_buf_bw,
-                                       use_ramulator_trace=self.config.get_ramulator_trace()
+                                       use_ramulator_trace=self.config.use_ramulator_trace
                                       )
         else:
             self.ifmap_buf = rdbuf()
             self.filter_buf = rdbuf()
         
-            if self.config.get_ramulator_trace() == True:
+            if self.use_ramulator_trace == True:
                 root_path = os.getcwd()
                 topology_file = self.topo.split('.')[0]
                 ifmap_dram_trace = (root_path+"/results/"+topology_file+"_ifmapFile0.npy")
@@ -113,7 +114,7 @@ class double_buffered_scratchpad:
                                       word_size=word_size,
                                       active_buf_frac=rd_buf_active_frac,
                                       backing_buf_bw=ifmap_backing_buf_bw,
-                                      use_ramulator_trace=self.config.get_ramulator_trace()
+                                      use_ramulator_trace=self.use_ramulator_trace
                                       )
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
@@ -121,7 +122,7 @@ class double_buffered_scratchpad:
                                        word_size=word_size,
                                        active_buf_frac=rd_buf_active_frac,
                                        backing_buf_bw=filter_backing_buf_bw,
-                                       use_ramulator_trace=self.config.get_ramulator_trace()
+                                       use_ramulator_trace=self.use_ramulator_trace
                                        )
 
         self.ofmap_buf.set_params(backing_buf_obj=self.ofmap_port,
