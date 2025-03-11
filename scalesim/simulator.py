@@ -171,7 +171,7 @@ class simulator:
 
         compute_report_name = self.top_path + '/COMPUTE_REPORT.csv'
         compute_report = open(compute_report_name, 'w')
-        header = ('LayerID, Total Cycles, Stall Cycles, Overall Util %, Mapping Efficiency %,'
+        header = ('LayerID, Total Cycles, Compute Cycles, Stall Cycles, Overall Util %, Mapping Efficiency %,'
                   ' Compute Util %,\n')
         compute_report.write(header)
 

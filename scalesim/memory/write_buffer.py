@@ -219,7 +219,8 @@ class write_buffer:
                 elif self.free_space < (self.total_size_elems - self.drain_buf_size):
                     self.append_to_trace_mat(force=True)
                     self.drain_end_cycle = self.empty_drain_buf(empty_start_cycle=current_cycle)
-                    current_cycle = self.drain_end_cycle
+                    # TODO sarbartha
+                    #current_cycle = self.drain_end_cycle
 
             out_cycles_arr.append(current_cycle)
 
@@ -322,7 +323,6 @@ class write_buffer:
         assert self.trace_valid, 'Traces not ready yet'
         start_cycle = np.amin(self.cycles_vec)
         end_cycle = np.amax(self.cycles_vec)
-
         return start_cycle, end_cycle
 
     #
