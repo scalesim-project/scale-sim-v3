@@ -4,6 +4,7 @@ on:
     branches: 
       - main
       - dev
+      - dev-ramulator-merge
   pull_request:
     branches:
      - main 
