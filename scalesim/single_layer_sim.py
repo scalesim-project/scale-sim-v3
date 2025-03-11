@@ -331,7 +331,7 @@ class single_layer_sim:
         assert self.runs_ready, 'Runs are not done yet'
 
         # Compute report
-        self.total_cycles = self.memory_system.get_total_compute_cycles() - self.memory_system.get_stall_cycles()
+        self.total_cycles = self.memory_system.get_total_compute_cycles()# - self.memory_system.get_stall_cycles()
         self.stall_cycles = self.memory_system.get_stall_cycles()
         self.overall_util = (self.num_compute * 100) / (self.total_cycles * self.num_mac_unit)
         self.mapping_eff = self.compute_system.get_avg_mapping_efficiency() * 100
