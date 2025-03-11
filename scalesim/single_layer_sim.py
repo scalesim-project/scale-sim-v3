@@ -4,6 +4,8 @@ the model and generates the data that goes inside the reports.
 """
 
 import os
+import numpy as np
+
 from scalesim.compute.compression import compression as cp
 
 from scalesim.scale_config import scale_config as cfg
@@ -45,6 +47,7 @@ class single_layer_sim:
         self.new_filter_size = 0
 
         # Report items : Compute report
+        self.overall_cycles = 0
         self.total_cycles = 0
         self.stall_cycles = 0
         self.num_compute = 0
@@ -269,13 +272,15 @@ class single_layer_sim:
                     filter_backing_buf_bw=filter_backing_bw,
                     ofmap_backing_buf_bw=ofmap_backing_bw,
                     verbose=self.verbose,
-                    estimate_bandwidth_mode=estimate_bandwidth_mode,
                     ifmap_sram_bank_num=self.config.ifmap_sram_bank_num,
                     ifmap_sram_bank_port=self.config.ifmap_sram_bank_port,
                     filter_sram_bank_num=self.config.filter_sram_bank_num,
                     filter_sram_bank_port=self.config.filter_sram_bank_port,
                     using_ifmap_custom_layout=self.using_ifmap_custom_layout,
                     using_filter_custom_layout=self.using_filter_custom_layout,
+                    estimate_bandwidth_mode=estimate_bandwidth_mode,
+                    config=self.config,
+                    topo=self.topo
             )
 
         # 2.2 Install the prefetch matrices to the read buffers to finish setup
@@ -326,7 +331,7 @@ class single_layer_sim:
         assert self.runs_ready, 'Runs are not done yet'
 
         # Compute report
-        self.total_cycles = self.memory_system.get_total_compute_cycles()
+        self.total_cycles = self.memory_system.get_total_compute_cycles() - self.memory_system.get_stall_cycles()
         self.stall_cycles = self.memory_system.get_stall_cycles()
         self.overall_util = (self.num_compute * 100) / (self.total_cycles * self.num_mac_unit)
         self.mapping_eff = self.compute_system.get_avg_mapping_efficiency() * 100
@@ -361,7 +366,9 @@ class single_layer_sim:
 
         self.ofmap_dram_start_cycle, self.ofmap_dram_stop_cycle, self.ofmap_dram_writes \
             = self.memory_system.get_ofmap_dram_details()
-
+        
+        self.overall_cycles = int(self.ofmap_dram_stop_cycle - min(self.ifmap_dram_start_cycle,self.filter_dram_start_cycle))
+        
         # BW calc for DRAM access
         self.avg_ifmap_dram_bw = self.ifmap_dram_reads / \
                                 (self.ifmap_dram_stop_cycle - self.ifmap_dram_start_cycle + 1)
@@ -388,7 +395,8 @@ class single_layer_sim:
         if not self.report_items_ready:
             self.calc_report_data()
 
-        items = [self.total_cycles,
+        items = [self.overall_cycles,
+                 self.total_cycles,
                  self.stall_cycles,
                  self.overall_util,
                  self.mapping_eff,
