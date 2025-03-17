@@ -168,7 +168,7 @@ def worker(fileName, topology,shaper):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-topology', metavar='Topology file', type=str,
-                        default="test_runs",
+                        default="",
                         help="Directory path for the layers"
                         )
     parser.add_argument('-parallel', metavar='Run sequential or parallel', type=bool,

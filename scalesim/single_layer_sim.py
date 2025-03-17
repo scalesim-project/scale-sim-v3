@@ -263,6 +263,7 @@ class single_layer_sim:
                 ofmap_backing_bw = arr_col
 
             self.memory_system.set_params(
+                    layer_id = self.layer_id,
                     word_size=word_size,
                     ifmap_buf_size_bytes=ifmap_buf_size_bytes,
                     filter_buf_size_bytes=filter_buf_size_bytes,

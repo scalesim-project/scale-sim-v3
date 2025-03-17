@@ -27,6 +27,7 @@ class double_buffered_scratchpad:
         """
         __init__ method.
         """
+        self.layer_id = 0
         self.ifmap_buf = rdbuf()
         self.filter_buf = rdbuf()
         self.ofmap_buf =wrbuf()
@@ -79,6 +80,7 @@ class double_buffered_scratchpad:
 
     #
     def set_params(self,
+                   layer_id=0,
                    verbose=True,
                    estimate_bandwidth_mode=False,
                    word_size=1,
@@ -93,6 +95,10 @@ class double_buffered_scratchpad:
         """
         Method to set the double buffered memory simulation parameters for housekeeping.
         """
+        self.layer_id = layer_id
+        self.topo = topo
+        self.config = config
+        self.use_ramulator_trace = config.get_ramulator_trace()
 
         self.estimate_bandwidth_mode = estimate_bandwidth_mode
 
@@ -121,10 +127,11 @@ class double_buffered_scratchpad:
             
             if self.use_ramulator_trace == True:
                 root_path = os.getcwd()
-                topology_file = self.topo.split('.')[0]
-                ifmap_dram_trace = (root_path+"/results/"+topology_file+"_ifmapFile0.npy")
-                filter_dram_trace = (root_path+"/results/"+topology_file+"_filterFile0.npy")
-                ofmap_dram_trace = (root_path+"/results/"+topology_file+"_ofmapFile0.npy")
+                #topology_file = self.topo.split('.')[0]
+                topology_file =''
+                ifmap_dram_trace = (root_path+"/results/"+topology_file+"_ifmapFile"+str(layer_id)+".npy")
+                filter_dram_trace = (root_path+"/results/"+topology_file+"_filterFile"+str(layer_id)+".npy")
+                ofmap_dram_trace = (root_path+"/results/"+topology_file+"_ofmapFile"+str(layer_id)+".npy")
                 self.ifmap_port.def_params(config = self.config, latency_file=ifmap_dram_trace)
                 self.filter_port.def_params(config = self.config, latency_file=filter_dram_trace)
                 self.ofmap_port.def_params(config=self.config, latency_file=ofmap_dram_trace)

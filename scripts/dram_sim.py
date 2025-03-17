@@ -230,11 +230,11 @@ def worker(layer_path, topo, shaper):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-topology', metavar='Topology file', type=str,
-                        default="test_runs",
+                        default="",
                         help="Directory path for the layers"
                         )
     parser.add_argument('-run_name', metavar='Config run name', type=str,
-                        default="GoogleTPU_v1_os",
+                        default="GoogleTPU_v1_ws",
                         help="Directory path for the layers"
                         )
     parser.add_argument('-shaper', metavar='Memory shaping logic', type=bool,
