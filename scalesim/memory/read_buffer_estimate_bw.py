@@ -62,11 +62,13 @@ class ReadBufferEstimateBw:
         self.params_set_flag = False
         self.active_buffer_prefetch_done = False
         self.trace_valid = False
+        self.use_ramulator_trace = False
 
     #
     def set_params(self, backing_buf_obj,
                    total_size_bytes=1, word_size=1, active_buf_frac=0.9,
-                   hit_latency=1, backing_buf_default_bw=1):
+                   hit_latency=1, backing_buf_default_bw=1,
+                   use_ramulator_trace = False):
         """
         Method to set the ifmap/filter double buffered memory simulation parameters for estimate
         bandwidth mode.
@@ -100,6 +102,7 @@ class ReadBufferEstimateBw:
         self.read_buffer_set_end_id = self.num_sets_active_buffer - 1
         self.last_prefetch_start_cycle = -2
         self.last_prefetch_end_cycle = -1  # TODO: Check what the correct value is
+        self.use_ramulator_trace = use_ramulator_trace
 
         #
         self.params_set_flag = True

@@ -3,6 +3,7 @@ The `write_buffer` class simulates the memory operations of the OFMAP SRAM for a
 write system in systolic array-based computations.
 """
 # TODO: Verification Pending
+import time
 import math
 import numpy as np
 # import matplotlib.pyplot as plt
@@ -218,6 +219,8 @@ class write_buffer:
                 elif self.free_space < (self.total_size_elems - self.drain_buf_size):
                     self.append_to_trace_mat(force=True)
                     self.drain_end_cycle = self.empty_drain_buf(empty_start_cycle=current_cycle)
+                    # TODO sarbartha
+                    #current_cycle = self.drain_end_cycle
 
             out_cycles_arr.append(current_cycle)
 
@@ -263,7 +266,7 @@ class write_buffer:
         else:
             self.cycles_vec = np.concatenate((self.cycles_vec, serviced_cycles_arr), axis=0)
 
-        service_end_cycle = serviced_cycles_arr[-1][0]
+        service_end_cycle = np.amax(serviced_cycles_arr)
         self.free_space += data_sz_to_drain
 
         self.drain_buf_start_line_id = self.drain_buf_end_line_id
@@ -293,7 +296,7 @@ class write_buffer:
             print('No trace has been generated yet')
             return
 
-        trace_matrix = np.concatenate((self.cycles_vec, self.trace_matrix), axis=1)
+        trace_matrix = np.column_stack((self.cycles_vec, self.trace_matrix))
 
         return trace_matrix
 
@@ -318,9 +321,8 @@ class write_buffer:
         Method to get start and stop cycles of the write buffer if trace_valid flag is set.
         """
         assert self.trace_valid, 'Traces not ready yet'
-        start_cycle = self.cycles_vec[0][0]
-        end_cycle = self.cycles_vec[-1][0]
-
+        start_cycle = np.amin(self.cycles_vec)
+        end_cycle = np.amax(self.cycles_vec)
         return start_cycle, end_cycle
 
     #

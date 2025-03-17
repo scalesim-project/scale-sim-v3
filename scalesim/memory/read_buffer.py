@@ -59,14 +59,14 @@ class read_buffer:
         self.active_buf_full_flag = False
         self.hashed_buffer_valid = False
         self.trace_valid = False
-
+        self.use_ramulator_trace = False
         self.enable_layout_evaluation = False
 
     #
     def set_params(self, backing_buf_obj,
                    total_size_bytes=1, word_size=1, active_buf_frac=0.9,
                    hit_latency=1, backing_buf_bw=1, num_bank=1, num_port=2,
-                   enable_layout_evaluation=False
+                   enable_layout_evaluation=False, use_ramulator_trace = False
                    ):
         """
         Method to set the ifmap/filter double buffered memory simulation parameters for
@@ -94,6 +94,9 @@ class read_buffer:
         self.bw_per_bank = self.req_gen_bandwidth // self.num_bank # bandwidth per bank
         self.enable_layout_evaluation = enable_layout_evaluation
         assert self.bw_per_bank * self.num_bank == self.req_gen_bandwidth, f"overall bandwidth must be divisible by total number of banks, number of banks = {self.num_bank}, bandwidth of each as {self.bw_per_bank}, total bandwidth = {self.req_gen_bandwidth}"
+
+        # Ramulator trace
+        self.use_ramulator_trace = use_ramulator_trace
 
     #
     def reset(self): # TODO: check if all resets are working propoerly
@@ -136,6 +139,7 @@ class read_buffer:
         self.active_buf_full_flag = False
         self.hashed_buffer_valid = False
         self.trace_valid = False
+        self.use_ramulator_trace = False
 
     #
     def set_fetch_matrix(self, fetch_matrix_np):
@@ -281,12 +285,12 @@ class read_buffer:
         #        If hit, return with hit latency
         #        Else, make the contents of prefetch buffer as active and then check
         #              finish till an ongoing prefetch is done before reassiging prefetch buffer
-
+        dram_stall_cycles = 0
         if not self.active_buf_full_flag:
             start_cycle = incoming_cycles_arr[0][0]
             # Needs to use the entire operand matrix
             # keeping in mind the tile order and everything
-            self.prefetch_active_buffer(start_cycle=start_cycle)
+            dram_stall_cycles = self.prefetch_active_buffer(start_cycle=start_cycle)
 
         out_cycles_arr = []
         offset = self.hit_latency
@@ -328,8 +332,10 @@ class read_buffer:
               for bank_id in range(self.num_bank):
                   max_line_request_among_all_banks = max(len(concurrent_line_addr[bank_id]), max_line_request_among_all_banks)
               offset += math.ceil(max_line_request_among_all_banks/self.num_port) - 1
-
-              out_cycles = cycle + offset
+              if self.use_ramulator_trace == True:
+                  out_cycles = cycle + offset + dram_stall_cycles
+              else:
+                  out_cycles = cycle + offset
               out_cycles_arr.append(out_cycles)
 
           out_cycles_arr_np = np.asarray(out_cycles_arr).reshape((len(out_cycles_arr), 1))
@@ -357,8 +363,10 @@ class read_buffer:
                       if potential_stall_cycles > 0:
                           offset += potential_stall_cycles
                     
-
-              out_cycles = cycle + offset
+              if self.use_ramulator_trace == True:
+                  out_cycles = cycle + offset + dram_stall_cycles
+              else:
+                  out_cycles = cycle + offset
               out_cycles_arr.append(out_cycles)
 
           out_cycles_arr_np = np.asarray(out_cycles_arr).reshape((len(out_cycles_arr), 1))
@@ -411,10 +419,11 @@ class read_buffer:
                                               incoming_requests_arr_np=prefetch_requests)
 
         # 4. Update the variables
-        self.last_prefetch_cycle = int(response_cycles_arr[-1][0])
+        #self.last_prefetch_cycle = int(response_cycles_arr[-1][0])
+        self.last_prefetch_cycle = int(max(response_cycles_arr))
 
         # Update the trace matrix
-        self.trace_matrix = np.concatenate((response_cycles_arr, prefetch_requests), axis=1)
+        self.trace_matrix = np.column_stack((response_cycles_arr, prefetch_requests))
         self.trace_valid = True
 
         # Set active buffer contents
@@ -435,7 +444,8 @@ class read_buffer:
             self.next_line_prefetch_idx = num_lines % self.fetch_matrix.shape[0]
         else:
             self.next_line_prefetch_idx = (num_lines + 1) % self.fetch_matrix.shape[0]
-        
+
+        return (self.last_prefetch_cycle - cycles_arr[-1][0] - 1)   
     #
     def new_prefetch(self):
         """
@@ -504,12 +514,12 @@ class read_buffer:
                                               incoming_requests_arr_np=prefetch_requests)
 
         # 5. Update the variables
-        self.last_prefetch_cycle = response_cycles_arr[-1][0]
+        self.last_prefetch_cycle = np.amax(response_cycles_arr)
 
         assert response_cycles_arr.shape == cycles_arr.shape, \
                'The request and response cycles dims do not match'
 
-        this_prefetch_trace = np.concatenate((response_cycles_arr, prefetch_requests), axis=1)
+        this_prefetch_trace = np.column_stack((response_cycles_arr, prefetch_requests))
         self.trace_matrix = np.concatenate((self.trace_matrix, this_prefetch_trace), axis=0)
 
         # Set the line to be prefetched next
@@ -560,8 +570,8 @@ class read_buffer:
         Method to get start and stop cycles of the read buffer if trace_valid flag is set.
         """
         assert self.trace_valid, 'Traces not ready yet'
-        start_cycle = self.trace_matrix[0][0]
-        end_cycle = self.trace_matrix[-1][0]
+        start_cycle = np.amin(self.trace_matrix[:,0])
+        end_cycle = np.amax(self.trace_matrix[:,0])
 
         return start_cycle, end_cycle
 
