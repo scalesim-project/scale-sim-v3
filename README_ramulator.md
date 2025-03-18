@@ -24,7 +24,7 @@ cp ../scripts/ramulator_patch ./ramulator
 cd ramulator
 make -j <num_jobs>
 
-### Step 2: Run the SCALE-Sim simulator with cycle-accurate memory requests
+### Run the SCALE-Sim simulator with cycle-accurate memory requests
 
 After this step, you will have a ramulator executable in the ./ramulator folder which will be used to simulate the memory.
 The ramulator integration is a multi-step process, where we need to first generate the demand trace by running the SCALE-Sim without any memory stalls. 
@@ -34,12 +34,12 @@ SCALE-Sim is rerun with the memory round-trip latency for each request, capturin
 The steps of plot generation are listed in the next step.
 
 
-### * Step 3: Plot the graphs to showcase the execution impact of memory components*
+### * Step 2: Plot the graphs to showcase the execution impact of memory components*
 
-# Step 3a:  Impact of DRAM channels on memory throughput 
+# Step 2a:  Impact of DRAM channels on memory throughput 
 
 source generate_fig9_ramulator_mem_bw_plot.sh
 
-# Step 3b: Report the stall cycles for different benchmarks
+# Step 2b: Report the stall cycles for different benchmarks
 
 source generate_fig10_ramulator_stall_plot.sh
