@@ -39,6 +39,9 @@ class read_port:
         self.bw = self.config.get_bandwidths_as_list()[0]
         if self.ramulator_trace == True:
             self.latency_matrix = np.load(latency_file)
+            #print(f"Latency file is {latency_file}")
+        self.stall_cycles=0
+        self.latency = 1
         
     def set_params(self, latency):
         """
@@ -62,6 +65,8 @@ class read_port:
             self.count+=1
         else:
             latency_out = self.latency
+        if(latency_out > 10000):
+            latency_out = 1
         return latency_out
 
     # The incoming read requests will be needed when the capability of port is expanded
@@ -88,6 +93,7 @@ class read_port:
                 self.request_array.sort()
                 if self.request_array[0] >= updated_req_timestamp:
                     self.stall_cycles += self.request_array[0] - updated_req_timestamp
+                    #print(f"stall cycle: {self.stall_cycles}. request array: {self.request_array[0]} updated_req_timestamp: {updated_req_timestamp}")
                     updated_req_timestamp = self.request_array[0]
                     self.request_array.pop(0)
                 else:
@@ -98,6 +104,7 @@ class read_port:
                         self.request_array = self.request_array[index:]
             elif len(self.request_array) > self.request_queue_size:
                 self.request_array = self.request_array[-self.request_queue_size:]
+                #print(f"stall cycle: {self.stall_cycles}. request array: {self.request_array[0]} updated_req_timestamp: {updated_req_timestamp}")
         
         self.stall_cycles=0
         return out_cycles_arr

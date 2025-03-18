@@ -41,6 +41,7 @@ class write_port:
         self.bw = self.config.get_bandwidths_as_list()[0]
         if self.ramulator_trace == True:
             self.latency_matrix = np.load(latency_file)
+        self.latency=0
     #
 
     def find_latency(self):
@@ -53,6 +54,8 @@ class write_port:
             self.count+=1
         else:
             latency_out = self.latency
+        if(latency_out > 10000):
+            latency_out = 0
 
         return latency_out
 
