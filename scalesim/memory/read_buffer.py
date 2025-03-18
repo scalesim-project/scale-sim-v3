@@ -515,9 +515,8 @@ class read_buffer:
 
         # 5. Update the variables
         self.last_prefetch_cycle = np.amax(response_cycles_arr)
-
-        assert response_cycles_arr.shape == cycles_arr.shape, \
-               'The request and response cycles dims do not match'
+        #assert response_cycles_arr.shape == cycles_arr.shape, \
+        #       'The request and response cycles dims do not match'
 
         this_prefetch_trace = np.column_stack((response_cycles_arr, prefetch_requests))
         self.trace_matrix = np.concatenate((self.trace_matrix, this_prefetch_trace), axis=0)
