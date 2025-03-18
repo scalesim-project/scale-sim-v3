@@ -8,15 +8,16 @@ The memory interface can be easily evaluated by performing the following steps:
 
 ### * Step 1a: Installing the dev-ramulator branch of the SCALE-Sim repository*
 Follow the steps to get the SCALE-Sim source from github and then switch to the dev-ramulator branch
-git checkout dev-ramulator
+git clone https://github.com/scalesim-project/scale-sim-v2.git
+git checkout dev-ramulator-merge
 
 ### * Step 1b: Installing the ramulator package*
 
 # Get the latest source from ramulator github
-cd submodules
-git clone https://github.com/CMU-SAFARI/ramulator.git
+git submodule update --init --recursive
 
 # Copy the patch files to the ramulator codebase 
+cd submodules
 cp ../scripts/ramulator_patch ./ramulator
 
 # Build ramulator
@@ -30,18 +31,15 @@ The ramulator integration is a multi-step process, where we need to first genera
 Next, the demand trace is fed to the Ramulator. Each memory request is tagged with an arrival time, based on when the request is sent to the Ramulator.
 The Ramulator reports the response time of each individual requests. The memory round-trip time is saved in a numpy file.
 SCALE-Sim is rerun with the memory round-trip latency for each request, capturing realistic pipeline stalls caused by memory delays and reporting the resulting execution time.
-Below are the steps to run the SCALE-Sim simulator with the memory component.
+The steps of plot generation are listed in the next step.
 
-source run_ramulator.sh 
-OR
-source run_ramulator_mnk.sh
 
 ### * Step 3: Plot the graphs to showcase the execution impact of memory components*
 
 # Step 3a:  Impact of DRAM channels on memory throughput 
 
-python scripts/plots/mem_bw_plot.py
+source generate_fig9_ramulator_mem_bw_plot.sh
 
 # Step 3b: Report the stall cycles for different benchmarks
 
-python scripts/plot/stall_plot.py
+source generate_fig10_ramulator_stall_plot.sh

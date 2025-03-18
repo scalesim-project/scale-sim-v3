@@ -65,7 +65,8 @@ if __name__ =="__main__":
             assert "The specific configuration does not exist"
         for file in os.listdir(run_folder):
             if file.startswith('DDR4_'):
-                index = int(re.findall('\d+',file)[1][2:])
+                #index = int(re.findall('\d+',file)[1][2:])
+                index = int(file.split('.')[0].split('_')[1])
                 reportFile[(config[i],index)] = file
                 num_file+=1
         bw = []

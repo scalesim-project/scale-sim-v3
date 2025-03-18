@@ -60,7 +60,7 @@ def plot_bw():
 
 if __name__ =="__main__":
 
-    run_folder = os.getcwd() + '/Exp3/stall_cycles'
+    run_folder = os.getcwd() + '/Exp2/stall_cycles'
     for i in range(len(benchmark)):
         if not os.listdir(run_folder):
             assert "The run folder does not exist"
