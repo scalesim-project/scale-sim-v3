@@ -7,6 +7,7 @@ mkdir results/dram_results
 mkdir results/dram_results/mem_bw
 ramulator_path="./submodules/ramulator/configs"
 outpath="./results/dram_results/mem_bw"
+sed -i "s/channels = [0-9]\+/channels = 1/g" $ramulator_path/DDR4-config.cfg
 echo "Running scalesimV3 with r1c1 configuration"
 ./run_ramulator.sh resnet18 512
 mkdir $outpath/Resnet18_r1c1

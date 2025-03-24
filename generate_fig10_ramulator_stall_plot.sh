@@ -59,9 +59,12 @@ echo "Running scalesimV3 for vit_h with buffer size 32"
 echo "Running scalesimV3 for vit_l with buffer size 32"
 ./run_ramulator_mnk.sh vit_l 32
 echo "Complete run with the 128 buffer size"
+git checkout configs/google.cfg
+git checkout configs/google_ramulator.cfg
 
 echo "Plotting for Figure 10 stall results"
 mkdir Exp2
 mv ./results/dram_results/stall_cycles Exp2/
 python scripts/plots/stall_plot.py
 echo "Figure 10 plot generation successful!!!"
+
