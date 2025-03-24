@@ -64,6 +64,7 @@ git checkout configs/google_ramulator.cfg
 
 echo "Plotting for Figure 10 stall results"
 mkdir Exp2
+rm -rf Exp2/*
 mv ./results/dram_results/stall_cycles Exp2/
 python scripts/plots/stall_plot.py
 echo "Figure 10 plot generation successful!!!"
