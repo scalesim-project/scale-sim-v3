@@ -6,3 +6,4 @@ numba
 pandas
 cython
 setuptools
+matplotlib
