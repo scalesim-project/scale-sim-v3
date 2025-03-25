@@ -18,7 +18,7 @@ git submodule update --init --recursive
 
 # Copy the patch files to the ramulator codebase 
 cd submodules
-cp ../scripts/ramulator_patch ./ramulator
+cp ../scripts/ramulator_patch/* ./ramulator/
 
 # Build ramulator
 cd ramulator
