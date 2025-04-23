@@ -8,6 +8,8 @@ import os
 import numpy as np
 from tqdm import tqdm
 
+from scalesim.scale_config import scale_config as cfg
+from scalesim.topology_utils import topologies as topo
 from scalesim.memory.read_buffer import read_buffer as rdbuf
 from scalesim.memory.read_buffer_estimate_bw import ReadBufferEstimateBw as rdbuf_est
 from scalesim.memory.read_port import read_port as rdport
@@ -25,6 +27,7 @@ class double_buffered_scratchpad:
         """
         __init__ method.
         """
+        self.layer_id = 0
         self.ifmap_buf = rdbuf()
         self.filter_buf = rdbuf()
         self.ofmap_buf =wrbuf()
@@ -32,6 +35,8 @@ class double_buffered_scratchpad:
         self.ifmap_port = rdport()
         self.filter_port = rdport()
         self.ofmap_port = wrport()
+        self.config = cfg()
+        self.topo = topo()
 
         self.verbose = True
 
@@ -68,12 +73,14 @@ class double_buffered_scratchpad:
         self.estimate_bandwidth_mode = False
         self.traces_valid = False
         self.params_valid_flag = True
+        self.use_ramulator_trace = self.config.get_ramulator_trace()
 
         self.using_ifmap_custom_layout = False
         self.using_filter_custom_layout = False
 
     #
     def set_params(self,
+                   layer_id=0,
                    verbose=True,
                    estimate_bandwidth_mode=False,
                    word_size=1,
@@ -81,11 +88,17 @@ class double_buffered_scratchpad:
                    rd_buf_active_frac=0.5, wr_buf_active_frac=0.5,
                    ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1,
                    ifmap_sram_bank_num=1, ifmap_sram_bank_port=2, filter_sram_bank_num=1, filter_sram_bank_port=2,
-                   using_ifmap_custom_layout=False, using_filter_custom_layout=False):
+                   using_ifmap_custom_layout=False, using_filter_custom_layout=False,
+                   config=cfg(), topo=topo()
+                   ):
 
         """
         Method to set the double buffered memory simulation parameters for housekeeping.
         """
+        self.layer_id = layer_id
+        self.topo = topo
+        self.config = config
+        self.use_ramulator_trace = config.get_ramulator_trace()
 
         self.estimate_bandwidth_mode = estimate_bandwidth_mode
 
@@ -97,16 +110,31 @@ class double_buffered_scratchpad:
                                       total_size_bytes=ifmap_buf_size_bytes,
                                       word_size=word_size,
                                       active_buf_frac=rd_buf_active_frac,
-                                      backing_buf_default_bw=ifmap_backing_buf_bw)
+                                      backing_buf_default_bw=ifmap_backing_buf_bw,
+                                      use_ramulator_trace=self.use_ramulator_trace
+                                      )
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
                                        total_size_bytes=filter_buf_size_bytes,
                                        word_size=word_size,
                                        active_buf_frac=rd_buf_active_frac,
-                                       backing_buf_default_bw=filter_backing_buf_bw)
+                                       backing_buf_default_bw=filter_backing_buf_bw,
+                                       use_ramulator_trace=self.use_ramulator_trace
+                                       )
         else:
             self.ifmap_buf = rdbuf()
             self.filter_buf = rdbuf()
+            
+            if self.use_ramulator_trace == True:
+                root_path = os.getcwd()
+                #topology_file = self.topo.split('.')[0]
+                topology_file =''
+                ifmap_dram_trace = (root_path+"/results/"+topology_file+"_ifmapFile"+str(layer_id)+".npy")
+                filter_dram_trace = (root_path+"/results/"+topology_file+"_filterFile"+str(layer_id)+".npy")
+                ofmap_dram_trace = (root_path+"/results/"+topology_file+"_ofmapFile"+str(layer_id)+".npy")
+                self.ifmap_port.def_params(config = self.config, latency_file=ifmap_dram_trace)
+                self.filter_port.def_params(config = self.config, latency_file=filter_dram_trace)
+                self.ofmap_port.def_params(config=self.config, latency_file=ofmap_dram_trace)
 
             self.ifmap_buf.set_params(backing_buf_obj=self.ifmap_port,
                                       total_size_bytes=ifmap_buf_size_bytes,
@@ -115,7 +143,9 @@ class double_buffered_scratchpad:
                                       backing_buf_bw=ifmap_backing_buf_bw,
                                       num_bank=ifmap_sram_bank_num,
                                       num_port=ifmap_sram_bank_port,
-                                      enable_layout_evaluation=using_ifmap_custom_layout)
+                                      enable_layout_evaluation=using_ifmap_custom_layout,
+                                      use_ramulator_trace=self.use_ramulator_trace
+                                      )
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
                                        total_size_bytes=filter_buf_size_bytes,
@@ -124,7 +154,9 @@ class double_buffered_scratchpad:
                                        backing_buf_bw=filter_backing_buf_bw,
                                        num_bank=filter_sram_bank_num,
                                        num_port=filter_sram_bank_port,
-                                       enable_layout_evaluation=using_filter_custom_layout)
+                                       enable_layout_evaluation=using_filter_custom_layout,
+                                       use_ramulator_trace=self.use_ramulator_trace
+                                       )
 
         self.ofmap_buf.set_params(backing_buf_obj=self.ofmap_port,
                                   total_size_bytes=ofmap_buf_size_bytes,
@@ -194,7 +226,7 @@ class double_buffered_scratchpad:
         """
 
         out_cycles_arr_np = self.ofmap_buf.service_writes(incoming_requests_arr_np,
-                                                          incoming_cycles_arr)
+                                                          incoming_cycles_arr, 1)
 
         return out_cycles_arr_np
 
@@ -245,6 +277,7 @@ class double_buffered_scratchpad:
             ofmap_stalls = ofmap_cycle_out[0] - cycle_arr[0]
 
             self.stall_cycles += int(max(ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]))
+            #self.stall_cycles += ifmap_stalls[0] + filter_stalls[0] + ofmap_stalls[0]
 
         if self.estimate_bandwidth_mode:
             # IDE shows warning as complete_all_prefetches is not implemented in read_buffer class
@@ -269,7 +302,9 @@ class double_buffered_scratchpad:
             np.asarray(ofmap_serviced_cycles).reshape((len(ofmap_serviced_cycles), 1))
         self.ofmap_trace_matrix = np.concatenate((ofmap_services_cycles_np, ofmap_demand_mat),
                                                  axis=1)
-        self.total_cycles = int(ofmap_serviced_cycles[-1][0])
+        #self.total_cycles = int(ofmap_serviced_cycles[-1][0])
+        ## Probable fault in sanity check
+        self.total_cycles = int(max(ofmap_serviced_cycles))
 
         # END of serving demands from memory
         self.traces_valid = True
@@ -446,7 +481,7 @@ class double_buffered_scratchpad:
         Method to get the number of stall cycles if trace_valid flag is set.
         """
         assert self.traces_valid, 'Traces not generated yet'
-        return self.stall_cycles
+        return int(self.stall_cycles)
 
     #
     def get_ifmap_sram_start_stop_cycles(self):
