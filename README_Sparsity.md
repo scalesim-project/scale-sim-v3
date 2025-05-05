@@ -61,13 +61,3 @@ Along with the usual outputs/reports generated, the simulator generates a ```SPA
 
 We introduce a new metric, referred to as ```Filter Metadata SRAM Bandwidth```, to quantify the amount of metadata being accessed. This metric is calculated for each layer of the CNN model and represents the total number of metadata words read from the filter SRAM to the Processing Elements (PEs) during computation cycles, measured in ```words/cycle```. If the ```SparsitySupport``` option is set to false, the filter metadata SRAM bandwidth is considered zero.
 
-## Developers
-
-Main developer for sparsity:
-* Nikhil Chandra (@NikhilChandraNcbs)
-
-Contributers:
-* Ritik Raj (@ritikraj7)
-
-Maintainers and Advisors
-* Tushar Krishna

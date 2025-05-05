@@ -4,3 +4,6 @@
 [submodule "submodules/ramulator"]
 	path = submodules/ramulator
 	url = https://github.com/CMU-SAFARI/ramulator.git
+[submodule "multi-core"]
+	path = multi-core
+	url = https://github.com/scalesim-project/krittika
