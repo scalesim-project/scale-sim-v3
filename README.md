@@ -201,7 +201,7 @@ Dev and maintainers:
 * Jianming Tong - SRAM Layout feature (@JianmingTONG)
 
 Advisors
-* Ananda Samajdhar
+* Ananda Samajdar
 * Tushar Krishna
 
 
