@@ -161,11 +161,13 @@ We also recommend referring to the following papers for insights on SCALE-Sim's 
 If you found this tool useful, please use the following bibtex to cite us
 
 ```
-@article{raj2025scale,
+@inproceedings{raj2025scale,
   title={SCALE-Sim v3: A modular cycle-accurate systolic accelerator simulator for end-to-end system analysis},
   author={Raj, Ritik and Banerjee, Sarbartha and Chandra, Nikhil and Wan, Zishen and Tong, Jianming and Samajdhar, Ananda and Krishna, Tushar},
-  journal={arXiv preprint arXiv:2504.15377},
-  year={2025}
+  booktitle={2025 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)},
+  pages={186--200},
+  year={2025},
+  organization={IEEE}
 }
 
 ```
