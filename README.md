@@ -44,7 +44,7 @@ After installing SCALE-Sim, it can be run by using the ```scalesim.scale``` and 
 The above method uses the installed package for running the simulator.
 In cases where you would like to run directly from the source, the following command should be used instead.
 
-```$PYTHONPATH=$PYTHONPATH:<scale_sim_repo_root> python3 <scale_sim_repo_root>/scalesim/scale.py -c <path_to_config_file> -t <path_to_topology_file>```
+```$ PYTHONPATH=$PYTHONPATH:<scale_sim_repo_root> python3 <scale_sim_repo_root>/scalesim/scale.py -c <path_to_config_file> -t <path_to_topology_file>```
 
 If you are running from sources for the first time and do not have all the dependencies installed, please install them first  using the following command.
 
