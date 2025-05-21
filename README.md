@@ -27,20 +27,24 @@ Getting started is simple! SCALE-Sim is completely written in python and could b
 
 You can install SCALE-Sim in your environment using the following command
 
+```$ pip3 install <path-to-scalesim-v3-folder>```
+
+If you are a developer that will modify scale-sim during your usage, please install it with `-e` flag, which will create a symbolic link instead of replicating scalesim in your environment, thus modification of scale-sim code can be syncronized simultaneously
+
 ```$ pip3 install -e <path-to-scalesim-v3-folder>```
 
 ### *Launching a run*
 
-SCALE-Sim can be run by using the ```scale.py``` script from the repository and providing the paths to the architecture configuration, and the topology descriptor csv file.
+After installing SCALE-Sim, it can be run by using the ```scalesim.scale``` and providing the paths to the architecture configuration, and the topology descriptor csv file.
 
-```$ python3 scale.py -c <path_to_config_file> -t <path_to_topology_file> -p <path_to_output_log_dir>```
+```$ python3 -m scalesim.scale -c <path_to_config_file> -t <path_to_topology_file> -p <path_to_output_log_dir>```
 
 ### *Running from source*
 
 The above method uses the installed package for running the simulator.
 In cases where you would like to run directly from the source, the following command should be used instead.
 
-```$ python3 <scale_sim_repo_root>/scalesim/scale.py -c <path_to_config_file> -t <path_to_topology_file>```
+```$ PYTHONPATH=$PYTHONPATH:<scale_sim_repo_root> python3 <scale_sim_repo_root>/scalesim/scale.py -c <path_to_config_file> -t <path_to_topology_file>```
 
 If you are running from sources for the first time and do not have all the dependencies installed, please install them first  using the following command.
 
