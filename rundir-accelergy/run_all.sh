@@ -2,13 +2,14 @@
 
 ########### User Input ##########################
 
-while getopts c:t:p:o: flag
+while getopts c:t:p:o:i: flag
 do
     case "${flag}" in
         c) scsimCfg=${OPTARG};;
         t) scsimTplg=${OPTARG};;
         p) scsimOutput=${OPTARG};;        
         o) allOutput=${OPTARG};;
+        i) topoOption=${OPTARG};;
     esac
 done 
 
@@ -22,23 +23,32 @@ echo "config file: $scsimCfg";
 echo "topology file: $scsimTplg";
 echo "scsim log dir: $scsimOutput";
 echo "output dir: $allOutput";
+echo "topology option: $topoOption";
 
 ################################################
 
-scsimCfg=$(realpath $scsimCfg)
-scsimTplg=$(realpath $scsimTplg)
-scsimOutput=$(realpath $scsimOutput)
-allOutput=$(realpath  $allOutput)
+# Ensure log and output directories exist before resolving absolute paths
+if [[ -n "$scsimOutput" ]]; then
+    mkdir -p "$scsimOutput" || { echo "Failed to create scsim log dir at $scsimOutput"; exit 1; }
+fi
+
+if [[ -n "$allOutput" ]]; then
+    mkdir -p "$allOutput" || { echo "Failed to create output dir at $allOutput"; exit 1; }
+fi
+
+scsimCfg=$(realpath "$scsimCfg")
+scsimTplg=$(realpath "$scsimTplg")
+scsimOutput=$(realpath "$scsimOutput")
+allOutput=$(realpath "$allOutput")
 
 rm -f accelergy_input/*.yaml
-mkdir -p $allOutput
 
 # Generate Accelergy::architecture.yaml from ScaleSim::scale.cfg
 python3 preprocess.py -c $scsimCfg -t $scsimTplg -p $scsimOutput -o $allOutput
 
 # Run Scale-sim
 cd ..
-python3 scale.py -c $scsimCfg -t $scsimTplg -p $scsimOutput
+python3 scale.py -c $scsimCfg -t $scsimTplg -p $scsimOutput -i $topoOption
 
 # Extract Accelergy::action_count.yaml from ScaleSim::reuslts
 cd rundir-accelergy
