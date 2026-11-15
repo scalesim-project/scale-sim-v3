@@ -94,9 +94,6 @@ DRAM dominates this small GEMM, so PE choice barely moves total energy. PoT save
 4. **What is left out:** pipeline registers, leakage, interconnect, and control. These add the same overhead to every PE type, so they shrink relative savings. Say so explicitly.
 5. **Sensitivity sweep:** run shifter-based PE energies at 0.5×, 1×, and 2× the values above, and DRAM at 10–30 pJ/bit, so the conclusions do not hinge on one number.
 
-## Optional: your own multiplier
-
-If the team uses Arif's FP16 logarithmic multiplier (ILM), its 45 nm synthesis results can be a row in table 2. Area is 271 µm²; take energy per operation as power × clock period at the synthesis clock, and cite the paper.
 
 ## References
 
