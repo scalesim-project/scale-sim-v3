@@ -29,7 +29,8 @@ def layer_macs(row, fmt):
     oh, ow = (ih - fh) // s + 1, (iw - fw) // s + 1
     return oh * ow * fh * fw * c * nf
 
-def main(run_dir, topo, fmt="conv", pe="baseline"):
+def compute(run_dir, topo, fmt="conv", pe="baseline"):
+    """Return a per-layer DataFrame of cycles, MACs and energy (pJ) for one run."""
     with open(topo) as f:
         rows = [r for r in csv.reader(f)][1:]
     macs = [layer_macs(r, fmt) for r in rows if len(r) > 1]
@@ -47,6 +48,10 @@ def main(run_dir, topo, fmt="conv", pe="baseline"):
         "E_sram_pJ": sram_bits * E_SRAM_BIT, "E_dram_pJ": dram_bits * E_DRAM_BIT})
     out["E_total_pJ"] = out[["E_mac_pJ", "E_sram_pJ", "E_dram_pJ"]].sum(axis=1)
     out["EDP"] = out["E_total_pJ"] * out["cycles"]
+    return out
+
+def main(run_dir, topo, fmt="conv", pe="baseline"):
+    out = compute(run_dir, topo, fmt, pe)
     print(out.to_string(index=False))
     t = out.sum(numeric_only=True)
     print(f"\nTOTAL ({pe}): {t.E_total_pJ/1e6:.3f} uJ, MAC share {t.E_mac_pJ/t.E_total_pJ:.1%}, "
