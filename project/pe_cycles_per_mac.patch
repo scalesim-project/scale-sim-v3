@@ -1,0 +1,31 @@
+--- a/scalesim/scale_config.py
++++ b/scalesim/scale_config.py
+@@ -105,6 +105,8 @@
+         self.filter_offset = int(config.get(section, 'FilterOffset'))
+         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
+         self.df = config.get(section, 'Dataflow')
++        # [Project 3] cycles one PE needs per MAC (1 = standard MAC, N = bit-serial)
++        self.pe_cycles_per_mac = int(config.get(section, 'PeCyclesPerMac', fallback='1'))
+         self.req_buf_sz_rd = int(config.get(section, 'ReadRequestBuffer')) // div_factor
+         self.req_buf_sz_wr = int(config.get(section, 'WriteRequestBuffer')) // div_factor
+ 
+--- a/scalesim/single_layer_sim.py
++++ b/scalesim/single_layer_sim.py
+@@ -240,6 +240,17 @@
+     
+         ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = self.compute_system.get_demand_matrices()
+ 
++        # [Project 3] multi-cycle PE: hold each cycle's demands for k cycles
++        k = getattr(self.config, 'pe_cycles_per_mac', 1)
++        if k > 1:
++            def stretch(m):
++                out = np.full((m.shape[0] * k, m.shape[1]), -1.0)
++                out[::k] = m
++                return out
++            ifmap_demand_mat = stretch(ifmap_demand_mat)
++            filter_demand_mat = stretch(filter_demand_mat)
++            ofmap_demand_mat = stretch(ofmap_demand_mat)
++
+ 
+         # 1.4 Get PE action count
+         self.ifmap_write_action_count, self.ifmap_read_action_count, self.filter_write_action_count, self.filter_read_action_count, \

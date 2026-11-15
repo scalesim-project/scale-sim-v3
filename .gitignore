@@ -27,3 +27,9 @@ test*
 configs_test
 benchmark_results
 .venv/
+
+# Project 3
+**/layer*/
+runs/
+__pycache__/
+*.egg-info/

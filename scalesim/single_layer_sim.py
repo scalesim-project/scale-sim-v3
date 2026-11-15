@@ -240,6 +240,17 @@ class single_layer_sim:
     
         ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = self.compute_system.get_demand_matrices()
 
+        # [Project 3] multi-cycle PE: hold each cycle's demands for k cycles
+        k = getattr(self.config, 'pe_cycles_per_mac', 1)
+        if k > 1:
+            def stretch(m):
+                out = np.full((m.shape[0] * k, m.shape[1]), -1.0)
+                out[::k] = m
+                return out
+            ifmap_demand_mat = stretch(ifmap_demand_mat)
+            filter_demand_mat = stretch(filter_demand_mat)
+            ofmap_demand_mat = stretch(ofmap_demand_mat)
+
 
         # 1.4 Get PE action count
         self.ifmap_write_action_count, self.ifmap_read_action_count, self.filter_write_action_count, self.filter_read_action_count, \

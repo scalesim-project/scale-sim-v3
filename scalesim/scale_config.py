@@ -105,6 +105,8 @@ class scale_config:
         self.filter_offset = int(config.get(section, 'FilterOffset'))
         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
         self.df = config.get(section, 'Dataflow')
+        # [Project 3] cycles one PE needs per MAC (1 = standard MAC, N = bit-serial)
+        self.pe_cycles_per_mac = int(config.get(section, 'PeCyclesPerMac', fallback='1'))
         self.req_buf_sz_rd = int(config.get(section, 'ReadRequestBuffer')) // div_factor
         self.req_buf_sz_wr = int(config.get(section, 'WriteRequestBuffer')) // div_factor
 
