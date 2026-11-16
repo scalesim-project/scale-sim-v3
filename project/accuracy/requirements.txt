@@ -1,0 +1,5 @@
+# Use the existing Python 3.11 SCALE-Sim environment
+numpy<2
+torch
+torchvision
+pillow
