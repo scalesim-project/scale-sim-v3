@@ -33,3 +33,13 @@ benchmark_results
 runs/
 __pycache__/
 *.egg-info/
+
+# Local Python environment
+scalesim-env/
+
+# Local backup files
+project/*_backup.py
+
+# Python cache
+__pycache__/
+*.pyc
