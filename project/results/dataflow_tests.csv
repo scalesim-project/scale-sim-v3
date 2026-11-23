@@ -1,0 +1,10 @@
+dataflow,k,upstream_cycles,cycles,stalls,ratio_vs_k1,k1_matches_upstream
+ws,1,11199,11199,0,1.0,True
+ws,4,11199,44799,0,4.0,True
+ws,8,11199,89599,0,8.001,True
+os,1,10175,10175,0,1.0,True
+os,4,10175,40703,0,4.0,True
+os,8,10175,81407,0,8.001,True
+is,1,14207,14207,0,1.0,True
+is,4,14207,56831,0,4.0,True
+is,8,14207,113663,0,8.0,True
