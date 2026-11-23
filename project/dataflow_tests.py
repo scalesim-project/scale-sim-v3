@@ -1,3 +1,5 @@
+# Project 3
+
 """
 Test PeCyclesPerMac (k) with os/is dataflows (ws = control) vs unmodified SCALE-Sim.`   
 """
@@ -35,21 +37,28 @@ def run(repo, name, df, k=None):
     rep = pd.read_csv(OUT / name / "COMPUTE_REPORT.csv", skipinitialspace=True)
     rep.columns = rep.columns.str.strip()
     col = "Total Cycles" if "Total Cycles" in rep else [c for c in rep if c.startswith("Total Cycles")][0]
-    return int(rep[col].sum()), int(rep["Stall Cycles"].sum())
+    return dict(total_cycles=int(rep["Total Cycles (incl. prefetch)"].sum()),
+                compute_cycles=int(rep["Total Cycles"].sum()),
+                stalls=int(rep["Stall Cycles"].sum()),
+                util=float(rep["Overall Util %"].iloc[0]))
 
 rows = []
 for df in ["ws", "os", "is"]:
-    upstream, _ = run(UPSTREAM, f"upstream_{df}", df)
+    upstream_result = run(UPSTREAM, f"upstream_{df}", df)
     for k in [1, 4, 8]:
-        cyc, stall = run(ROOT, f"patched_{df}_k{k}", df, k)
-        rows.append(dict(dataflow=df, k=k, upstream_cycles=upstream, cycles=cyc, stalls=stall))
+        r = run(ROOT, f"patched_{df}_k{k}", df, k)
+        rows.append(dict(dataflow=df, k=k,
+                         upstream_total=upstream_result["total_cycles"],
+                         upstream_compute=upstream_result["compute_cycles"],
+                         **r))
 
 t = pd.DataFrame(rows)
-t["ratio_vs_k1"] = (t.cycles / t.groupby("dataflow").cycles.transform("first")).round(3) # upstream_cycles / cycles (in output)
-t["k1_matches_upstream"] = (t.k != 1) | (t.cycles == t.upstream_cycles)
-
+first = lambda c: t.groupby("dataflow")[c].transform("first")
+t["ratio_compute"] = (t.compute_cycles / first("compute_cycles")).round(3)
+t["ratio_total"] = (t.total_cycles / first("total_cycles")).round(3)
+t["real_util"] = (t.util * t.k).round(2)
+t["k1_matches_upstream"] = (t.k != 1) | ((t.total_cycles == t.upstream_total) & (t.compute_cycles == t.upstream_compute))
 t.to_csv(ROOT / "project/results/dataflow_tests.csv", index=False)
-
 print("\n| " + " | ".join(t.columns) + " |\n|" + "---|" * len(t.columns))
 for r in t.itertuples(index=False):
     print("| " + " | ".join(map(str, r)) + " |")
