@@ -2,7 +2,12 @@
 
 ## Process
 
-PeCyclesPerMac patches tested with output stationary and input stationary.
+PeCyclesPerMac patches tested with output stationary and input stationary (weight stationary as control).
+
+`project/dataflow_tests.py` runs the different SCALE-Sim application tests and writes results to `project/results/dataflow_tests.csv`.
+
+This test file has to have an upstream repository (no patches: scalesim-project/scale-sim-v3) to test the patched against. You can just go to directory containing this scale-sim-v3 and `git clone https://github.com/scalesim-project/scale-sim-v3.git scale-sim-upstream`. Then to run, in our project scale-sim-v3 folder with the venv activated, run `python project/dataflow_tests.py`.
+
 
 ## Results
 
@@ -19,11 +24,19 @@ PeCyclesPerMac patches tested with output stationary and input stationary.
 | is | 8 | 18506 | 14207 | 117962 | 113663 | 0 | 7.207270615767664 | 8.0 | 6.374 | 57.66 | True |
 
 `compute_cycles` is amount of cycles spent computing, no prefetch
+
 `ratio_compute` = compute cycles / compute cycles @ k = 1
+
 `ratio_total` = total cycles / total cycles @ k = 1
 
-`util` is overall utilization percentage from the SCALE-Sim report (not adjusted for k)
+`util` is overall utilization percentage from the SCALE-Sim report (actual MACs / 100*(number of number of PEs * compute cycles)) (not adjusted for k)
+
 `real_util` = util * k (real PE busy time)
 
 `k1` matched upstream cycles for all data flows.
 
+Note zero stalls because memory bandwidth is unlimited. The test uses a small GEMM on 32x32 array.
+
+real_util will not change with k as we find, and prefetch stays constant.
+
+We see that os and is operate correctly at k=1 to match unmodified SCALE-Sim, and the compute cycles scale correctly when k is changed to 4, 8.
